@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8" />
+    <title>Trig Function Graph</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        canvas { border: 1px solid #ccc; margin-top: 10px; }
+        .controls { margin-bottom: 10px; font-size: 18px; }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <input id="theta" type="range" min="0" max="360" value="0" />
+        中心角 ＝ <span id="degree">0</span> 度
+    </div>
+    <canvas id="graph" width="600" height="600"></canvas>
+
+    <script>
+        // DOM要素の取得
+        const canvas = document.getElementById("graph");
+        const ctx = canvas.getContext("2d");
+        const thetaInput = document.getElementById("theta");
+        const degreeText = document.getElementById("degree");
+
+        ctx.font = "24px sans-serif";
+
+        // 直線を描画するヘルパー関数
+        function drawLine(x0, y0, x1, y1, color) {
+            ctx.strokeStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x0, y0);
+            ctx.lineTo(x1, y1);
+            ctx.stroke();
+        }
+
+        // 描画メイン処理
+        function paint() {
+            const degree = parseFloat(thetaInput.value);
+            degreeText.textContent = degree;
+
+            // キャンバスのクリア
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.save();
+            ctx.translate(300, 300); // (300,300)を原点へ
+
+            // 座標軸の描画
+            drawLine(0, -300, 0, 300, "#ccc");
+            drawLine(-300, 0, 300, 0, "#ccc");
+
+            // 三角関数の計算
+            const radians = (degree * Math.PI) / 180;
+            const s0 = Math.sin(radians).toFixed(3);
+            const c0 = Math.cos(radians).toFixed(3);
+            
+            const c = c0 * 200;
+            const s = s0 * -200; // 画面座標系ではY軸が下向きのため反転
+
+            // 基準となる円の描画 (beginPathを入れないと線が繋がるバグを防げる)
+            ctx.beginPath();
+            ctx.arc(0, 0, 200, 0, Math.PI * 2);
+            ctx.strokeStyle = "#999";
+            ctx.stroke();
+
+            // cos（青の縦線とテキスト）
+            drawLine(c, s, c, 0, "blue");
+            ctx.fillStyle = "blue";
+            ctx.fillText("cos: " + c0, c - 10, 30);
+
+            // sin（緑の横線とテキスト）
+            drawLine(c, s, 0, s, "green");
+            ctx.fillStyle = "green";
+            ctx.fillText("sin: " + s0, -120, s - 10);
+
+            // 動径（赤の線）
+            drawLine(0, 0, c, s, "red");
+
+            ctx.restore();
+        }
+
+        // イベントリスナーの登録（'input'にすることでドラッグ中もリアルタイムに描画）
+        thetaInput.addEventListener("input", paint);
+
+        // 初期描画
+        paint();
+    </script>
+</body>
+</html>
